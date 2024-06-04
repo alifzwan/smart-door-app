@@ -72,7 +72,7 @@ const Lock = () => {
     }
 
     const handleUnlock = async () => {
-        try{
+        try {
             await unlockRoom()
             Alert.alert('Success', 'Room unlocked Successfully')
         } catch(error) {
