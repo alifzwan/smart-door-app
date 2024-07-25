@@ -1,20 +1,19 @@
 import axios from 'axios'
 
-const BASE_URL = 'http://localhost:5000'
+const BASE_URL = 'http://localhost:3000'
 
 const lockRoom = async () => {
     try {
-        const response = await axios.post(`${BASE_URL}/lock`)
-        return response.data
+        await axios.post(`${BASE_URL}/lock`)
     } catch (error) {
-        console.error('Error locking room:', error);
+        console.error('Error locking room:', error)
+        throw error
     }
 }
 
 const unlockRoom = async () => {
     try{
-        const response = await axios.post(`${BASE_URL}/unlock`)
-        return response.data
+        await axios.post(`${BASE_URL}/unlock`);
     } catch (error) {
         console.error('Error unlocking room:', error);
     }
@@ -22,9 +21,12 @@ const unlockRoom = async () => {
 
 const getStatus = async () => {
     try {
-        const response = await axios.get(`${BASE_URL}/status`)
-        return response.data
+        const response = await axios.get(`${BASE_URL}/status`);
+        return response.data.status;
     } catch (error) {
-        console.error('Error getting status:', error);
+        console.error('Error fetching status:', error);
+        throw error;
     }
 }
+
+export { lockRoom, unlockRoom, getStatus };
