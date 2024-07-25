@@ -1,20 +1,37 @@
 const express = require('express')
+const cors = require('cors')
 const logger = require('./utils/logger')
 const config = require('./utils/config')
-const SerialPort = require('serialport')
-const Readline = require('@serialport/parser-readline')
+
+
+const { SerialPort } = require('serialport'); 
+const { ReadlineParser } = require('@serialport/parser-readline') //want to parse data received from arduino
 
 const app = express()
 
-const arduinoPort = new SerialPort('/dev/ttyACM0', { baudRate: 9600 })
-const parser = arduinoPort.pipe(new Readline({ delimiter: '\n' }))
+app.use(cors())
 
-arduinoPort.on('open', () => {
-    logger.info('Serial port is open')
+let roomStatus = 'unknown' // room status is unknown until we receive data from arduino
+
+// Establish connection with arduino
+const arduinoPort = new SerialPort({ 
+    path: '/dev/ttyUSB0',  // path to the port
+    baudRate: 9600         // baud rate - speed which data is transmitted over serial port
 })
 
+// Connect the arduinoPort to the ReadlineParser
+const parser = arduinoPort.pipe(new ReadlineParser({ 
+    delimiter: '\n' 
+}));
+
+// Listen for data from the arduino to know roomStatus
 parser.on('data', data => {
     logger.info('Received data from Arduino:', data)
+    if(data.includes('locked')) {
+        roomStatus = 'locked'
+    } else if(data.includes('unlocked')) {
+        roomStatus = 'unlocked'   
+    }
 })
 
 app.use(express.json())
@@ -26,6 +43,7 @@ app.post('/lock', (request, respond) => {
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent lock command to Arduino')
+            roomStatus = 'locked'
             respond.status(200).send('Lock command sent to Arduino')
         }
     })
@@ -38,24 +56,14 @@ app.post('/unlock', (request, respond) => {
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent unlock command to Arduino')
+            roomStatus = 'unlocked'
             respond.status(200).send('Unlock command sent to Arduino')
         }
     })
 })
 
 app.get('/status', (request, respond) => {
-    arduinoPort.write('status\n', (error) => {
-        if (error) {
-            logger.error('Error writing to Arduino:', error)
-            respond.status(500).send('Error writing to Arduino')
-        } else {
-            logger.info('Sent status command to Arduino')
-            respond.status(200).send('Status command sent to Arduino')
-        }
-    })
-    parser.once('data', data => {
-        respond.status(200).send(data)
-    })
+    respond.status(200).json({ status: roomStatus })
 })
 
 app.listen(config.PORT, () => {
