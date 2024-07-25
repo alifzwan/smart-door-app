@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "/home/alifzwan/PlatformIO/Projects\test/include",
+                "/home/alifzwan/PlatformIO/Projects\test/src",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/cores/arduino",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/variants/standard",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/libraries/EEPROM/src",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/libraries/HID/src",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/libraries/SPI/src",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/libraries/SoftwareSerial/src",
+                "/home/alifzwan/.platformio/packages/framework-arduino-avr/libraries/Wire/src",
+                ""
+            ],
+            "defines": [],
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c17",
+            "cppStandard": "gnu++17",
+            "intelliSenseMode": "linux-gcc-x64"
+        }
+    ],
+    "version": 4
+}
