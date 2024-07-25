@@ -1,7 +1,7 @@
 import { StyleSheet, Text, View, Pressable, Alert } from 'react-native'
-import React from 'react'
+import {useState, useEffect} from 'react'
 import { FontAwesome } from '@expo/vector-icons'
-import { lockRoom, unlockRoom } from '../../services/arduino'
+import { lockRoom, unlockRoom, getStatus } from '../../services/arduino'
 
 import * as theme from '../../theme/theme'
 import AppBar from '../bar/AppBar'
@@ -61,10 +61,17 @@ const styles = StyleSheet.create({
 })
 
 const Lock = () => {
+    
+    const [status, setStatus] = useState('');
+
+    useEffect(() => {
+        updateStatus();
+    }, []);
 
     const handleLock = async () => {
         try {
             await lockRoom()
+            updateStatus();
             Alert.alert('Success', 'Room locked Successfully')
         }catch(error) {
             Alert.alert('Error', 'Failed to lock the room' )
@@ -74,11 +81,21 @@ const Lock = () => {
     const handleUnlock = async () => {
         try {
             await unlockRoom()
+            updateStatus();
             Alert.alert('Success', 'Room unlocked Successfully')
         } catch(error) {
             Alert.alert('Error', 'Failed to unlock the room')
         }
     }
+
+    const updateStatus = async () => {
+        try {
+            const currentStatus = await getStatus();
+            setStatus(currentStatus);
+        } catch (error) {
+            Alert.alert('Error', 'Failed to fetch status');
+        }
+    };
 
 
     return (
@@ -89,6 +106,7 @@ const Lock = () => {
             </View>
             <View style={styles.body}>
                 <Text style={styles.bodyText}>Unlock or Lock room</Text>
+                {status && <Text style={styles.bodyText}>Current Status: {status}</Text>}
                 <Pressable style={styles.button} onPress={handleLock}>
                     <Text style={styles.buttonText}>
                         Lock
