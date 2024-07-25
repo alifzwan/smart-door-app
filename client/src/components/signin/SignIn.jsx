@@ -95,7 +95,7 @@ const SignIn = () => {
     const onSubmit = async (values, { setFieldError }) => {
         setLoading(true)
         try{
-           const { response, error } = await supabase.auth.signInWithPassword({
+           const { data, error } = await supabase.auth.signInWithPassword({
                 email: values.username,
                 password: values.password
             })
@@ -103,7 +103,7 @@ const SignIn = () => {
                 setFieldError('username', error.message);
                 setFieldError('password', error.message);
             } else {
-                console.log("Sign In Successfull: ", response)
+                console.log("Sign In Successfull: ", data)
                 navigate('/room')
             }
         } catch(error) {
