@@ -107,16 +107,27 @@ const Lock = () => {
                 <Text style={styles.headerText}>Hi, Alif Zakwan</Text>
             </View>
             <View style={styles.body}>
-                {status.status && (
-                    <Text style={styles.bodyText}>
-                        Room {selectedRoom} is <Text style={{ color: 'red' }}>{status.status}</Text>
+                <View style={styles.body}>
+                    <Text>
+                        {status.status && (
+                            <Text style={styles.bodyText}>
+                                Room {selectedRoom} is <Text style={{ color: 'red' }}>{status.status}</Text>
+                            </Text>
+                        )}
                     </Text>
-                )}
-                {status.timestamp && (
-                    <Text style={styles.bodyText}>
-                        Time: {new Date(status.timestamp).toLocaleString()}
+                </View>
+
+                <View style={styles.body}>
+                    <Text>
+                        {status.timestamp && (
+                            <Text style={styles.bodyText}>
+                                Time: {new Date(status.timestamp).toLocaleString()}
+                            </Text>
+                        )}
                     </Text>
-                )}
+                </View>
+                
+                
                 <Pressable style={styles.button} onPress={handleLock}>
                     <Text style={styles.buttonText}>
                         Lock
