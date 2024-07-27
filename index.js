@@ -8,10 +8,10 @@ const { SerialPort } = require('serialport');
 const { ReadlineParser } = require('@serialport/parser-readline') //want to parse data received from arduino
 
 const app = express()
-
+app.use(express.json())
 app.use(cors())
 
-let roomStatus = 'unknown' // room status is unknown until we receive data from arduino
+let roomStatus = { status: 'unknown', timestamp: null} // room status is unknown until we receive data from arduino
 
 // Establish connection with arduino
 const arduinoPort = new SerialPort({ 
@@ -28,13 +28,12 @@ const parser = arduinoPort.pipe(new ReadlineParser({
 parser.on('data', data => {
     logger.info('Received data from Arduino:', data)
     if(data.includes('locked')) {
-        roomStatus = 'locked'
+        roomStatus = { status: 'locked', timestamp: new Date() }
     } else if(data.includes('unlocked')) {
-        roomStatus = 'unlocked'   
+        roomStatus = { status: 'unlocked', timestamp: new Date() }  
     }
 })
 
-app.use(express.json())
 
 app.post('/lock', (request, respond) => {
     arduinoPort.write('lock\n', (error) => {
@@ -43,8 +42,8 @@ app.post('/lock', (request, respond) => {
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent lock command to Arduino')
-            roomStatus = 'locked'
-            respond.status(200).send('Lock command sent to Arduino')
+            roomStatus = { status: 'locked', timestamp: new Date() }
+            respond.status(200).send(roomStatus)
         }
     })
 })
@@ -56,14 +55,14 @@ app.post('/unlock', (request, respond) => {
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent unlock command to Arduino')
-            roomStatus = 'unlocked'
-            respond.status(200).send('Unlock command sent to Arduino')
+            roomStatus = { status: 'unlocked', timestamp: new Date() }
+            respond.status(200).send(roomStatus)
         }
     })
 })
 
 app.get('/status', (request, respond) => {
-    respond.status(200).json({ status: roomStatus })
+    respond.status(200).json(roomStatus)
 })
 
 app.listen(config.PORT, () => {
