@@ -1,11 +1,12 @@
 import { StyleSheet, Text, View, Pressable, Alert } from 'react-native'
-import {useState, useEffect} from 'react'
+import {useState, useEffect, useContext} from 'react'
 import { FontAwesome } from '@expo/vector-icons'
 import { lockRoom, unlockRoom, getStatus } from '../../services/arduino'
 
 import * as theme from '../../theme/theme'
 import AppBar from '../bar/AppBar'
-
+import Room from '../room/Room'
+import { RoomContext } from '../../utils/RoomContext';
 
 const styles = StyleSheet.create({
     container: {
@@ -62,7 +63,8 @@ const styles = StyleSheet.create({
 
 const Lock = () => {
     
-    const [status, setStatus] = useState('');
+    const [status, setStatus] = useState({ status: '', timestamp: ''});
+    const { selectedRoom } = useContext(RoomContext)
 
     useEffect(() => {
         updateStatus();
@@ -70,21 +72,21 @@ const Lock = () => {
 
     const handleLock = async () => {
         try {
-            await lockRoom()
-            updateStatus();
-            Alert.alert('Success', 'Room locked Successfully')
+            const response = await lockRoom()
+            setStatus(response)
+            console.log('Success', 'Room locked Successfully')
         }catch(error) {
-            Alert.alert('Error', 'Failed to lock the room' )
+            console.log('Error', 'Failed to lock the room' )
         }
     }
 
     const handleUnlock = async () => {
         try {
-            await unlockRoom()
-            updateStatus();
-            Alert.alert('Success', 'Room unlocked Successfully')
+            const response = await unlockRoom()
+            setStatus(response)
+            console.log('Success', 'Room unlocked Successfully')
         } catch(error) {
-            Alert.alert('Error', 'Failed to unlock the room')
+            console.log('Error', 'Failed to unlock the room')
         }
     }
 
@@ -105,8 +107,16 @@ const Lock = () => {
                 <Text style={styles.headerText}>Hi, Alif Zakwan</Text>
             </View>
             <View style={styles.body}>
-                <Text style={styles.bodyText}>Unlock or Lock room</Text>
-                {status && <Text style={styles.bodyText}>Current Status: {status}</Text>}
+                {status.status && (
+                    <Text style={styles.bodyText}>
+                        Room {selectedRoom} is <Text style={{ color: 'red' }}>{status.status}</Text>
+                    </Text>
+                )}
+                {status.timestamp && (
+                    <Text style={styles.bodyText}>
+                        Time: {new Date(status.timestamp).toLocaleString()}
+                    </Text>
+                )}
                 <Pressable style={styles.button} onPress={handleLock}>
                     <Text style={styles.buttonText}>
                         Lock

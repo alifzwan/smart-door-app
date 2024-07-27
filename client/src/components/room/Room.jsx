@@ -1,10 +1,11 @@
-import React from 'react';
-import { StyleSheet, Text, View, Pressable, Image } from 'react-native';
-import { Ionicons, FontAwesome } from '@expo/vector-icons';
-import * as theme from '../../theme/theme';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useNavigate } from 'react-router-native';
-import AppBar from '../bar/AppBar';
+import React, { useContext } from 'react'
+import { StyleSheet, Text, View, Pressable, Image } from 'react-native'
+import { Ionicons, FontAwesome } from '@expo/vector-icons'
+import * as theme from '../../theme/theme'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useNavigate } from 'react-router-native'
+import AppBar from '../bar/AppBar'
+import { RoomContext } from '../../utils/RoomContext'
 
 
 const styles = StyleSheet.create({
@@ -75,6 +76,12 @@ const styles = StyleSheet.create({
 
 const Room = () => {
     const navigate = useNavigate()
+    const { setSelectedRoom } = useContext(RoomContext)
+
+    const handlePress = (room) => {
+        setSelectedRoom(room)
+        navigate('/lock')
+    }
    
     return (
         <View style={styles.container}>
@@ -88,7 +95,7 @@ const Room = () => {
             
             <View style={styles.buttonContainer}>
                 {[1, 2, 3, 4, 5, 6].map((room, index) => (
-                    <Pressable key={index} style={styles.button} onPress={() => navigate("/lock")}>
+                    <Pressable key={index} style={styles.button} onPress={() => handlePress(room)}>
                         <Text style={styles.buttonText}>Room {room}</Text>
                         <Ionicons name="arrow-forward" size={24} color="#fff" />
                     </Pressable>
