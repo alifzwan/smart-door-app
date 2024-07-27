@@ -31,6 +31,14 @@ void loop() {
         digitalWrite(lockPin, LOW); // Unlock the door
         isLocked = false;
         Serial.println("unlocked");
+    } else if(command == "status") {
+        if(isLocked) {
+          Serial.println("locked");
+        } else {
+          Serial.println("unlocked");
+        }
+    } else {
+      Serial.println("Invalid command");
     }
   }
 }
