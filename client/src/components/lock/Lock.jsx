@@ -124,7 +124,7 @@ const Lock = () => {
                 </Pressable>
                 <Pressable style={styles.button} onPress={handleUnlock}>
                     <Text style={styles.buttonText}>
-                    Unlock
+                        Unlock
                     </Text>
                 </Pressable>
             </View>
