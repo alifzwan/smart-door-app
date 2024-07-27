@@ -1,5 +1,5 @@
 const express = require('express')
-const cors = require('cors')
+const cors = require('cors') // Cross-Origin Resource Sharing - allows AJAX requests to skip the Same-origin policy and access resources from remote hosts
 const logger = require('./utils/logger')
 const config = require('./utils/config')
 
@@ -35,6 +35,7 @@ parser.on('data', data => {
 })
 
 
+// Routes
 app.post('/lock', (request, respond) => {
     arduinoPort.write('lock\n', (error) => {
         if (error) {
@@ -48,6 +49,7 @@ app.post('/lock', (request, respond) => {
     })
 })
 
+// Routes
 app.post('/unlock', (request, respond) => {
     arduinoPort.write('unlock\n', (error) => {
         if (error) {
