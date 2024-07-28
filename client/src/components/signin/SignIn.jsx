@@ -6,6 +6,7 @@ import * as yup from 'yup'
 import { useFormik } from 'formik' 
 import { useNavigate } from 'react-router-native'
 import { supabase } from '../../lib/supabase'
+import bcrypt from 'react-native-bcrypt'
 
 const styles = StyleSheet.create({
     container: {
@@ -82,29 +83,49 @@ const SignIn = () => {
 
     const navigate = useNavigate()
 
+     
     const initialValues = {
-        username: '',
+        student_id: '',
         password: ''
     }
-
+    
     const validationSchema = yup.object().shape({
-        username: yup.string().required('Username is required'),
+        student_id: yup.string().required('Student Matric is required'),
         password: yup.string().required('Password is required')
     })
+
+    const formik = useFormik({
+        initialValues,
+        validationSchema,
+        onSubmit
+    })
+
 
     const onSubmit = async (values, { setFieldError }) => {
         setLoading(true)
         try{
-           const { data, error } = await supabase.auth.signInWithPassword({
-                email: values.username,
-                password: values.password
-            })
+           const { data, error } = await supabase
+                .from('students')
+                .select('password_hash')
+                .eq('student_id', values.student_id)
+                .single()
+
+
             if(error) {
-                setFieldError('username', error.message);
-                setFieldError('password', error.message);
+                setFieldError('student_id', 'Invalid student matric or password');
+                setFieldError('password', 'Invalid student matric or password');
             } else {
-                console.log("Sign In Successfull: ", data)
-                navigate('/room')
+
+                const isValidPassword = bcrypt.compareSync(values.password, data.password_hash)
+
+                if(isValidPassword){
+                    console.log("Login successful: ", values.student_id)
+                    navigate('/room')
+
+                } else {
+                    setFieldError('student_id', 'Invalid student matric or password');
+                    setFieldError('password', 'Invalid student matric or password');
+                }
             }
         } catch(error) {
             setFieldError('username', error.message);
@@ -112,12 +133,7 @@ const SignIn = () => {
         }
         setLoading(false)
     }
-
-    const formik = useFormik({
-        initialValues,
-        validationSchema,
-        onSubmit
-    })
+    
 
     return (
         <View style={styles.container}>
@@ -132,14 +148,14 @@ const SignIn = () => {
                     <Text style={styles.label}>Sign in UPM-ID</Text>
                     <TextInput 
                         placeholder="UPM-ID Username"
-                        style={[styles.input, formik.touched.username && formik.errors.username && styles.errorInput]}
-                        onChangeText={formik.handleChange('username')}
-                        value={formik.values.username}
-                        onBlur={formik.handleBlur('username')}
+                        style={[styles.input, formik.touched.student_id && formik.errors.student_id && styles.errorInput]}
+                        onChangeText={formik.handleChange('student_id')}
+                        value={formik.values.student_id}
+                        onBlur={formik.handleBlur('student_id')}
                     />
-                    {formik.touched.username && formik.errors.username && (
+                    {formik.touched.student_id && formik.errors.student_id && (
                         <Text style={styles.errorText}>
-                            {formik.errors.username}
+                            {formik.errors.student_id}
                         </Text>
                     )}
                 </View>
