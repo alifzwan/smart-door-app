@@ -23,12 +23,12 @@ void loop() {
    
     if (command == "lock") {
 
-      digitalWrite(lockPin, HIGH); // Lock the door
+      digitalWrite(lockPin, LOW); // Lock the door
       isLocked = true;
       Serial.println("locked");
 
     } else if (command == "unlock") {
-        digitalWrite(lockPin, LOW); // Unlock the door
+        digitalWrite(lockPin, HIGH); // Unlock the door
         isLocked = false;
         Serial.println("unlocked");
     } else if(command == "status") {
