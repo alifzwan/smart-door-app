@@ -6,7 +6,11 @@ import { lockRoom, unlockRoom, getStatus } from '../../services/arduino'
 import * as theme from '../../theme/theme'
 import AppBar from '../bar/AppBar'
 import Room from '../room/Room'
-import { RoomContext } from '../../utils/RoomContext';
+import { RoomContext, useRoomContext } from '../../utils/RoomContext';
+import { supabase } from '../../lib/supabase'
+import moment from 'moment-timezone';
+
+
 
 const styles = StyleSheet.create({
     container: {
@@ -65,6 +69,7 @@ const Lock = () => {
     
     const [status, setStatus] = useState({ status: '', timestamp: ''});
     const { selectedRoom } = useContext(RoomContext)
+    const { studentId } = useRoomContext()
 
     useEffect(() => {
         updateStatus();
@@ -74,6 +79,7 @@ const Lock = () => {
         try {
             const response = await lockRoom()
             setStatus(response)
+            await handleAction('lock')
             console.log('Success', 'Room locked Successfully')
         }catch(error) {
             console.log('Error', 'Failed to lock the room' )
@@ -84,6 +90,7 @@ const Lock = () => {
         try {
             const response = await unlockRoom()
             setStatus(response)
+            await handleAction('unlock')
             console.log('Success', 'Room unlocked Successfully')
         } catch(error) {
             console.log('Error', 'Failed to unlock the room')
@@ -98,6 +105,23 @@ const Lock = () => {
             Alert.alert('Error', 'Failed to fetch status');
         }
     };
+
+    const handleAction = async ( action ) => {
+        try {
+            const timestamp = moment().tz('Asia/Kuala_Lumpur').format('YYYY-MM-DD HH:mm');
+            const { error } = await supabase
+                .from('student_actions')
+                .insert([{ student_id: studentId, action, timestamp: timestamp }])
+
+            if(error){
+                throw error
+            }
+
+        } catch (error){
+            console.error('Error inserting action:', error)
+        }
+
+    }
 
 
     return (
