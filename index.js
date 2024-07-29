@@ -21,35 +21,35 @@ const arduinoPort = new SerialPort({
 
 // Connect the arduinoPort to the ReadlineParser
 const parser = arduinoPort.pipe(new ReadlineParser({ 
-    delimiter: '\n' 
+    delimiter: '\n'  // delimiter to split the data
 }));
 
 // Listen for data from the arduino to know roomStatus
 parser.on('data', data => {
     logger.info('Received data from Arduino:', data)
-    if(data.includes('locked')) {
-        roomStatus = { status: 'locked', timestamp: new Date() }
-    } else if(data.includes('unlocked')) {
-        roomStatus = { status: 'unlocked', timestamp: new Date() }  
+    if(data.includes('locked')) { // if the data is locked
+        roomStatus = { status: 'locked', timestamp: new Date() } // update the room status
+    } else if(data.includes('unlocked')) { // if the data contains unlocked
+        roomStatus = { status: 'unlocked', timestamp: new Date() }  // update the room status
     }
 })
 
 
-// Routes
+// lock the room
 app.post('/lock', (request, respond) => {
-    arduinoPort.write('lock\n', (error) => {
+    arduinoPort.write('lock\n', (error) => { // write to the arduino
         if (error) {
             logger.error('Error writing to Arduino:', error)
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent lock command to Arduino')
-            roomStatus = { status: 'locked', timestamp: new Date() }
-            respond.status(200).send(roomStatus)
+            roomStatus = { status: 'locked', timestamp: new Date() } // update the room status
+            respond.status(200).send(roomStatus) // send the room status back to the client
         }
     })
 })
 
-// Routes
+// unlock the room
 app.post('/unlock', (request, respond) => {
     arduinoPort.write('unlock\n', (error) => {
         if (error) {
@@ -57,12 +57,13 @@ app.post('/unlock', (request, respond) => {
             respond.status(500).send('Error writing to Arduino')
         } else {
             logger.info('Sent unlock command to Arduino')
-            roomStatus = { status: 'unlocked', timestamp: new Date() }
-            respond.status(200).send(roomStatus)
+            roomStatus = { status: 'unlocked', timestamp: new Date() } // update the room status
+            respond.status(200).send(roomStatus) // send the room status back to the client
         }
     })
 })
 
+// get the status of the room
 app.get('/status', (request, respond) => {
     respond.status(200).json(roomStatus)
 })
