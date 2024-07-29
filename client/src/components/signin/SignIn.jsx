@@ -7,6 +7,7 @@ import { useFormik } from 'formik'
 import { useNavigate } from 'react-router-native'
 import { supabase } from '../../lib/supabase'
 import bcrypt from 'react-native-bcrypt'
+import { useRoomContext } from '../../utils/RoomContext'
 
 const styles = StyleSheet.create({
     container: {
@@ -80,26 +81,19 @@ const styles = StyleSheet.create({
 const SignIn = () => {
     const [passwordVisible, setPasswordVisible] = useState(false)
     const [loading, setLoading] = useState(false)
+    const { setStudentId } = useRoomContext()
 
     const navigate = useNavigate()
 
-     
     const initialValues = {
         student_id: '',
         password: ''
     }
-    
+
     const validationSchema = yup.object().shape({
         student_id: yup.string().required('Student Matric is required'),
         password: yup.string().required('Password is required')
     })
-
-    const formik = useFormik({
-        initialValues,
-        validationSchema,
-        onSubmit
-    })
-
 
     const onSubmit = async (values, { setFieldError }) => {
         setLoading(true)
@@ -119,6 +113,7 @@ const SignIn = () => {
                 const isValidPassword = bcrypt.compareSync(values.password, data.password_hash)
 
                 if(isValidPassword){
+                    setStudentId(values.student_id)
                     console.log("Login successful: ", values.student_id)
                     navigate('/room')
 
@@ -133,7 +128,12 @@ const SignIn = () => {
         }
         setLoading(false)
     }
-    
+
+    const formik = useFormik({
+        initialValues,
+        validationSchema,
+        onSubmit
+    })
 
     return (
         <View style={styles.container}>
