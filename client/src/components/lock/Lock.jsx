@@ -69,7 +69,7 @@ const Lock = () => {
     
     const [status, setStatus] = useState({ status: '', timestamp: ''});
     const { selectedRoom } = useContext(RoomContext)
-    const { studentId } = useRoomContext()
+    const { studentId } = useRoomContext() // Get the student ID from the context
 
     useEffect(() => {
         updateStatus();
@@ -90,7 +90,7 @@ const Lock = () => {
         try {
             const response = await unlockRoom()
             setStatus(response)
-            await handleAction('unlock')
+            await handleAction('unlock') 
             console.log('Success', 'Room unlocked Successfully')
         } catch(error) {
             console.log('Error', 'Failed to unlock the room')
@@ -108,7 +108,7 @@ const Lock = () => {
 
     const handleAction = async ( action ) => {
         try {
-            const timestamp = moment().tz('Asia/Kuala_Lumpur').format('YYYY-MM-DD HH:mm');
+            const timestamp = moment().tz('Asia/Kuala_Lumpur').format('YYYY-MM-DD HH:mm') // Get the current timestamp in Kuala Lumpur timezone
             const { error } = await supabase
                 .from('student_actions')
                 .insert([{ student_id: studentId, action, timestamp: timestamp }])
