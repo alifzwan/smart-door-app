@@ -1,7 +1,7 @@
 #include <Arduino.h>
 
-// Define the pin connected to the lock mechanism
-const int lockPin = 8; // Pin 8 is connected to the lock mechanism
+// Define the pin connected to the relay module
+const int lockPin = 8; // Pin 8 is connected to the relay module
 bool isLocked = false; // initialized as unlocked
 
 
@@ -26,7 +26,6 @@ void loop() {
       digitalWrite(lockPin, LOW); // Lock the door
       isLocked = true;
       Serial.println("locked");
-
     } else if (command == "unlock") {
         digitalWrite(lockPin, HIGH); // Unlock the door
         isLocked = false;
