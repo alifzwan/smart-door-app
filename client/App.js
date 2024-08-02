@@ -1,19 +1,28 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-import Main from './src/Main';
-import { NativeRouter } from 'react-router-native';
-import Constants from 'expo-constants';
+import { StatusBar } from 'expo-status-bar'
+import { StyleSheet, View } from 'react-native'
+import Main from './src/Main'
+import { NativeRouter } from 'react-router-native'
+import Constants from 'expo-constants'
+import { useFonts } from 'expo-font'
 
 export default function App() {
-  console.log("Constants:", Constants.expoConfig);
+  // Load the Helvetica-World font
+  let [fontsLoaded] = useFonts({
+    'Helvetica-World': require('./assets/Helvetica.ttf'), // Ensure the path is correct
+  })
+
+  
+
+  console.log("Constants:", Constants.expoConfig)
+
   return (
     <View style={styles.container}>
       <StatusBar style="auto" />
       <NativeRouter>
-        <Main />  
+        <Main />
       </NativeRouter>
     </View>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
