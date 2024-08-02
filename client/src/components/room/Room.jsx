@@ -1,11 +1,10 @@
 import React, { useContext } from 'react'
 import { StyleSheet, Text, View, Pressable, Image } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
-import * as theme from '../../theme/theme'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigate } from 'react-router-native'
-import AppBar from '../bar/AppBar'
 import { RoomContext } from '../../utils/RoomContext'
+import theme from '../../theme/theme'
 
 
 const styles = StyleSheet.create({
@@ -63,15 +62,15 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         fontSize: 16,
     },
-    footer: {
-        width: '100%',
-        padding: 10,
-        flexDirection: 'row',
-        justifyContent: 'space-around',
-        backgroundColor: '#fff',
-        borderTopWidth: 1,
-        borderColor: '#ddd',
-    },
+    // footer: {
+    //     width: '100%',
+    //     padding: 10,
+    //     flexDirection: 'row',
+    //     justifyContent: 'space-around',
+    //     backgroundColor: '#fff',
+    //     borderTopWidth: 1,
+    //     borderColor: '#ddd',
+    // },
 });
 
 const Room = () => {
@@ -90,7 +89,7 @@ const Room = () => {
                     <FontAwesome name="user-circle" size={30} color="white" style={{marginRight: 5}}/>
                     <Text style={styles.welcomeText}>Hi, Alif Zakwan</Text>
                 </View>
-                <Text style={styles.welcomeText}>Connect to a device</Text>
+                <Text style={styles.welcomeText}>Room Access</Text>
             </LinearGradient>
             
             <View style={styles.buttonContainer}>
@@ -100,10 +99,10 @@ const Room = () => {
                         <Ionicons name="arrow-forward" size={24} color="#fff" />
                     </Pressable>
                 ))}
-                <Pressable style={styles.button} onPress={() => navigate("/")}>
+                {/* <Pressable style={styles.button} onPress={() => navigate("/")}>
                     <Text style={styles.buttonText}>Logout</Text>
                     <Ionicons name="log-out" size={24} color="#fff" />
-                </Pressable>
+                </Pressable> */}
             </View>
 
             {/* <View style={styles.footer}>
