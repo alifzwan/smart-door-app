@@ -115,7 +115,7 @@ const SignIn = () => {
                 if(isValidPassword){
                     setStudentId(values.student_id)
                     console.log("Login successful: ", values.student_id)
-                    navigate('/room')
+                    navigate('/home')
 
                 } else {
                     setFieldError('student_id', 'Invalid student matric or password');
