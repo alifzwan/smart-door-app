@@ -7,8 +7,13 @@ import Lock from './components/lock/Lock'
 import Homepage from './components/homepage/Homepage'
 import Book from './components/book/Book'
 import Booking from './components/book/Booking'
+import Detail from './components/book/Detail'
+
 import AppBar from './components/bar/AppBar'
 import DateBar from './components/bar/DateBar'
+import DetailBar from './components/bar/DetailBar'
+
+
 import { RoomProvider } from './utils/RoomContext'
 
 const Main = () => {
@@ -21,7 +26,8 @@ const Main = () => {
           <Route path="/room" element={<><AppBar /><Room /></>} />
           <Route path="/book" element={<><AppBar /><Book /></>} />
           <Route path="/booking" element={<><DateBar /><Booking /></>} />
-          {/* <Route path="/book" element={<><DateBar /><Book /></>} /> */}
+          <Route path="/detail" element={<><DetailBar /><Detail /></>} />
+
           <Route path="/lock" element={<><AppBar /><Lock /></>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
