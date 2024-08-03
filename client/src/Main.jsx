@@ -6,6 +6,7 @@ import Room from './components/room/Room'
 import Lock from './components/lock/Lock'
 import Homepage from './components/homepage/Homepage'
 import Book from './components/book/Book'
+import Booking from './components/book/Booking'
 import AppBar from './components/bar/AppBar'
 import DateBar from './components/bar/DateBar'
 import { RoomProvider } from './utils/RoomContext'
@@ -18,7 +19,9 @@ const Main = () => {
           <Route path="/" element={<SignIn />} />
           <Route path="/home" element={<Homepage />} />
           <Route path="/room" element={<><AppBar /><Room /></>} />
-          <Route path="/book" element={<><DateBar /><Book /></>} />
+          <Route path="/book" element={<><AppBar /><Book /></>} />
+          <Route path="/booking" element={<><DateBar /><Booking /></>} />
+          {/* <Route path="/book" element={<><DateBar /><Book /></>} /> */}
           <Route path="/lock" element={<><AppBar /><Lock /></>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
