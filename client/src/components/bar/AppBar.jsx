@@ -3,6 +3,8 @@ import React from 'react'
 import AntDesign from '@expo/vector-icons/AntDesign'
 import { useNavigate, Link } from 'react-router-native'
 import * as theme from '../../theme/theme'
+import { Ionicons } from '@expo/vector-icons'
+
 
 const styles = StyleSheet.create({
     container: {
@@ -27,8 +29,10 @@ const AppBar = () => {
   return (
     <View style={styles.container}>
       <Pressable onPress={() => navigate(-1)} style={styles.backButton}>
-        <AntDesign name="arrowleft" size={20} color="black" />
-        <Text style={styles.backText}>Back</Text>
+        <Ionicons name="chevron-back" size={24} color="black" />
+
+        {/* <AntDesign name="arrowleft" size={20} color="black" /> */}
+        {/* <Text style={styles.backText}>Back</Text> */}
       </Pressable>
     </View>
   )
