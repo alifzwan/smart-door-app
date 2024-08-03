@@ -2,66 +2,82 @@ import { StyleSheet, Text, View, Pressable, Alert } from 'react-native'
 import {useState, useEffect, useContext} from 'react'
 import { FontAwesome } from '@expo/vector-icons'
 import { lockRoom, unlockRoom, getStatus } from '../../services/arduino'
-
-import * as theme from '../../theme/theme'
+import theme from '../../theme/theme'
 import AppBar from '../bar/AppBar'
 import Room from '../room/Room'
 import { RoomContext, useRoomContext } from '../../utils/RoomContext';
 import { supabase } from '../../lib/supabase'
 import moment from 'moment-timezone';
+import { LinearGradient } from 'expo-linear-gradient'
+
 
 
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 10,
-        backgroundColor: '#f5f5f5',
-    },
-    header: {
-        flexDirection: 'row',
+        padding: 20,
+        backgroundColor: '#ffffff',
         alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statusBox: {
+        width: '100%',
+        padding: 20,
+        borderRadius: 10,
+        marginBottom: 20,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    linearGradient: {
+        width: '100%',
+        padding: 15,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginBottom: 80,
+    },
+    statusText: {
+        color: '#fff',
+        fontWeight: theme.fontWeights.bold,
+        fontSize: 18,
+        textAlign: 'center',
         marginBottom: 20,
     },
-    icon: {
-        marginRight: 10,
+    timestampText: {
+        color: '#fff',
+        fontWeight: theme.fontWeights.normal,
+        fontFamily: 'Helvetica-World',
+        fontSize: 15,
+        textAlign: 'center',
+        marginTop: 10,
+
     },
-    body: {
-        flexDirection: 'column',
+    buttonContainer: {
+        flex: 1,
+        width: '100%',
+        justifyContent: 'center',
         alignItems: 'center',
-        margin: 10
-    },
-    headerText: {
-        color: theme.colors.textSecondary,
-        fontWeight: theme.fontWeights.bold,
-        fontSize: theme.fontSize.heading,
-    },
-    bodyText: {
-        color: theme.colors.textSecondary,
-        fontWeight: theme.fontWeights.bold,
-        fontSize: theme.fontSize.subheading,
-        marginBottom: 20,
+        gap: 80,
     },
     button: {
         backgroundColor: theme.backgroundColor.secondary,
-        padding: 20,
-        width: '80%',
+        padding: 15,
+        width: '100%',
         height: 60,
         marginVertical: 10,
-        borderRadius: 10,
+        borderRadius: 5,
         alignItems: 'center',
-        justifyContent: 'space-between',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
+        justifyContent: 'center',
         elevation: 5,
     },
-    buttonText:{
+    buttonText: {
         color: theme.colors.textPrimary,
         fontWeight: theme.fontWeights.bold,
-        fontSize: theme.fontSize.subheading
-    }
+        fontSize: 18,
+        fontFamily: 'Helvetica-World',
+
+    },
 
 })
 
@@ -126,43 +142,30 @@ const Lock = () => {
 
     return (
         <View style={styles.container}>
-            <View style={styles.header}>
-                <FontAwesome name="user-circle" size={30} color="black" style={styles.icon}/>
-                <Text style={styles.headerText}>Hi, Alif Zakwan</Text>
-            </View>
-            <View style={styles.body}>
-                <View style={styles.body}>
-                    <Text>
-                        {status.status && (
-                            <Text style={styles.bodyText}>
-                                Room {selectedRoom} is <Text style={{ color: 'red' }}>{status.status}</Text>
-                            </Text>
-                        )}
-                    </Text>
-                </View>
-
-                <View style={styles.body}>
-                    <Text>
-                        {status.timestamp && (
-                            <Text style={styles.bodyText}>
-                                Time: {new Date(status.timestamp).toLocaleString()}
-                            </Text>
-                        )}
-                    </Text>
-                </View>
+           <LinearGradient colors={['#FF512F', '#DD2476']} style={styles.linearGradient}>
+                <Text style={styles.statusText}>
+                    <FontAwesome name="user-circle" size={30} color="#fff" /> Hi Alif Zakwan!
+                </Text>
+                <Text style={styles.statusText}>
+                    Room {selectedRoom} is {status.status}
+                </Text>
+                <Text style={styles.timestampText}>
+                    {status.timestamp ? new Date(status.timestamp).toLocaleString() : ''}
+                </Text>
+            </LinearGradient>
                 
-                
+            <View style={styles.buttonContainer}>
                 <Pressable style={styles.button} onPress={handleLock}>
                     <Text style={styles.buttonText}>
-                        Lock
+                            Lock
                     </Text>
                 </Pressable>
                 <Pressable style={styles.button} onPress={handleUnlock}>
                     <Text style={styles.buttonText}>
-                        Unlock
+                            Unlock
                     </Text>
                 </Pressable>
-            </View>
+            </View>    
         </View>
     )
 }
