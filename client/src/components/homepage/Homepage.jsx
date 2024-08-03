@@ -22,13 +22,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginBottom: 20,
     borderRadius: 10,
-    borderWidth:1
   },
   userInfo: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 20,
   },
   welcomeText: {
     color: '#fff',
@@ -64,10 +62,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
     elevation: 5,
   },
   buttonLogout: {
@@ -79,10 +73,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     flexDirection: 'row',
     justifyContent: 'space-between',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.8,
-    shadowRadius: 2,
     elevation: 5
   },
 
@@ -99,7 +89,7 @@ const Homepage = () => {
 
   return (
     <View style={styles.container}>
-      <LinearGradient colors={['#C70039', '#FF5733']} style={styles.header}>
+      <LinearGradient colors={['#FF512F', '#DD2476']} style={styles.header}>
         <View style={styles.userInfo}>
             <FontAwesome name="user-circle" size={30} color="white" style={{marginRight: 5}}/>
             <Text style={styles.welcomeText}>Hi, Alif Zakwan</Text>
