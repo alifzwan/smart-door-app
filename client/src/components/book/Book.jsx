@@ -10,7 +10,7 @@ import theme from '../../theme/theme'
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f0f0f0',
+        backgroundColor: '#ffffff',
         alignItems: 'center',
         padding: 20,
     },
@@ -27,12 +27,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 20,
 
-    },
-    avatar: {
-        width: 50,
-        height: 50,
-        borderRadius: 25,
-        marginRight: 10,
     },
     welcomeText: {
         color: '#fff',
@@ -51,10 +45,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         flexDirection: 'row',
         justifyContent: 'space-between',
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.8,
-        shadowRadius: 2,
         elevation: 5,
     },
     buttonText: {
@@ -80,12 +70,12 @@ const Book = () => {
 
     const handlePress = (room) => {
         setSelectedRoom(room)
-        navigate('/lock')
+        navigate('/booking')
     }
    
     return (
         <View style={styles.container}>
-            <LinearGradient colors={['#C70039', '#FF5733']} style={styles.header}>
+            <LinearGradient colors={['#FF512F', '#DD2476']} style={styles.header}>
                 <View style={styles.userInfo}>
                     <FontAwesome name="user-circle" size={30} color="white" style={{marginRight: 5}}/>
                     <Text style={styles.welcomeText}>Hi, Alif Zakwan</Text>
