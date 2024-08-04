@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View, Pressable } from 'react-native'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Calendar } from 'react-native-calendars'
 import theme from '../../theme/theme'
 import moment from 'moment'
 import { useNavigate } from 'react-router-native'
 import { useRoomContext } from '../../utils/RoomContext'
+import {supabase} from '../../lib/supabase'
 
 const styles = StyleSheet.create({
     container: {
@@ -75,7 +76,7 @@ const styles = StyleSheet.create({
 const BookingScreen = () => {
     const [selectedDate, setSelectedDate] = useState('')
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
-    const { bookedSlots, setSelectedDate: setContextDate, setSelectedTimeSlot: setContextTimeSlot } = useRoomContext()
+    const { bookedSlots, setBookedSlots, setSelectedDate: setContextDate, setSelectedTimeSlot: setContextTimeSlot } = useRoomContext()
     const navigate = useNavigate()
 
     const timeSlots = [
@@ -84,14 +85,54 @@ const BookingScreen = () => {
         '2:00 PM', '3:00 PM', '4:00 PM',
     ]
 
-    const getCurrentTimeSlots = () => {
-        const currentTime = moment().format('h:mm A')
-        const currentDate = moment().format('YYYY-MM-DD')
-        if (selectedDate === currentDate) {
-            return timeSlots.filter(time => moment(time, 'h:mm A').isAfter(currentTime))
+    useEffect(() => {
+        const fetchBookedSlots = async () => {
+            const { data, error } = await supabase
+                .from('bookings')
+                .select('date, timeslot')
+            
+            if (error) {
+                console.error('Error fetching booked slots:', error)
+            } else {
+                const slots = data.reduce((acc, booking) => {
+                    const date = booking.date
+                    const timeSlot = booking.timeslot
+
+                    if (!acc[date]) {
+                        acc[date] = []
+                    }
+
+                    acc[date].push(timeSlot)
+                    return acc
+                }, {})
+
+                setBookedSlots(slots)
+            }
         }
 
-        return timeSlots
+        fetchBookedSlots()
+    }, [setBookedSlots])
+
+    const getCurrentTimeSlots = () => {
+        const currentTime = moment()
+        const currentDate = moment().format('YYYY-MM-DD')
+    
+        return timeSlots.filter(time => {
+            const slotTime = moment(time, 'h:mm A')
+    
+            // If the selected date is today, filter out times that have already passed
+            if (selectedDate === currentDate) {
+                return slotTime.isAfter(currentTime)
+            }
+    
+            // If the selected date is in the past, show no time slots
+            if (moment(selectedDate).isBefore(currentDate)) {
+                return false
+            }
+    
+            // If the selected date is in the future, show all time slots
+            return true
+        })
     }
 
     const onDayPress = (day) => {
@@ -156,6 +197,8 @@ const BookingScreen = () => {
                     )
                 })}
             </View>
+
+
             
             <View style={styles.continueButtonContainer}>
                 <Pressable style={styles.continueButton} onPress={handleContinuePress}>
