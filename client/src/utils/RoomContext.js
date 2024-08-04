@@ -8,6 +8,7 @@ export const RoomProvider = ({ children }) => {
     const [selectedDate, setSelectedDate] = useState(null)
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
     const [bookedSlots, setBookedSlots] = useState({})
+    const [bookingDetails, setBookingDetails] = useState({})
 
 
     return (
@@ -22,7 +23,9 @@ export const RoomProvider = ({ children }) => {
                 selectedTimeSlot,
                 setSelectedTimeSlot,
                 bookedSlots,
-                setBookedSlots 
+                setBookedSlots,
+                bookingDetails,
+                setBookingDetails
             }}
         >
             {children}
