@@ -6,13 +6,12 @@ import moment from 'moment'
 import { useNavigate } from 'react-router-native'
 import { useRoomContext } from '../../utils/RoomContext'
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
         backgroundColor: '#ffffff',
-        justifyContent: 'center'
+        justifyContent: 'center',
     },
     dateBar: {
         backgroundColor: theme.backgroundColor.secondary,
@@ -30,7 +29,7 @@ const styles = StyleSheet.create({
         padding: '0 10px 10px 10px',
         marginBottom: 40,
         borderWidth: 1,
-        borderRadius: 10
+        borderRadius: 10,
     },
     timeSlotContainer: {
         flexDirection: 'row',
@@ -52,9 +51,9 @@ const styles = StyleSheet.create({
         fontWeight: theme.fontWeights.bold,
         fontSize: theme.fontSize.body,
     },
-    continueButtonContainer:{
+    continueButtonContainer: {
         marginTop: 40,
-        alignItems: 'center'
+        alignItems: 'center',
     },
     continueButton: {
         backgroundColor: theme.backgroundColor.secondary,
@@ -85,21 +84,29 @@ const BookingScreen = () => {
         '2:00 PM', '3:00 PM', '4:00 PM',
     ]
 
+    const getCurrentTimeSlots = () => {
+        const currentTime = moment().format('h:mm A')
+        const currentDate = moment().format('YYYY-MM-DD')
+        if (selectedDate === currentDate) {
+            return timeSlots.filter(time => moment(time, 'h:mm A').isAfter(currentTime))
+        }
+
+        return timeSlots
+    }
+
     const onDayPress = (day) => {
         setSelectedDate(day.dateString)
         setContextDate(day.dateString)
-
+        setSelectedTimeSlot(null) // Reset the selected time slot when a new date is selected
     }
 
     const handleTimeSlotPress = (time) => {
         setSelectedTimeSlot(time)
         setContextTimeSlot(time)
-
     }
 
     const handleContinuePress = () => {
         if (selectedDate && selectedTimeSlot) {
-            // Proceed to booking confirmation
             navigate('/detail')
         } else {
             console.log('Please select a date and time slot')
@@ -132,7 +139,7 @@ const BookingScreen = () => {
             />
 
             <View style={styles.timeSlotContainer}>
-                {timeSlots.map((time, index) => {
+                {getCurrentTimeSlots().map((time, index) => {
                     const isBooked = bookedSlots[selectedDate]?.includes(time)
                     return (
                         <Pressable
@@ -140,10 +147,9 @@ const BookingScreen = () => {
                             style={[
                                 styles.timeSlotButton,
                                 selectedTimeSlot === time && { backgroundColor: 'tomato' },
-                                isBooked && { backgroundColor: 'red' }
+                                isBooked && { backgroundColor: selectedTimeSlot === time ? 'tomato' : 'red' },
                             ]}
-                            onPress={() => !isBooked && handleTimeSlotPress(time)}
-                            disabled={isBooked}
+                            onPress={() => handleTimeSlotPress(time)}
                         >
                             <Text style={styles.timeSlotText}>{time}</Text>
                         </Pressable>
