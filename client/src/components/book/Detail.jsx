@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import theme from '../../theme/theme'
 import { useRoomContext } from '../../utils/RoomContext'
 import { useNavigate } from 'react-router-native'
+import { supabase } from '../../lib/supabase'
 
 const styles = StyleSheet.create({
     container: {
@@ -80,67 +81,95 @@ const styles = StyleSheet.create({
 const Detail = () => {
     const [name, setName] = useState('')
     const [reason, setReason] = useState('')
-    const { studentId, selectedRoom, selectedDate, selectedTimeSlot, bookedSlots, setBookedSlots,  bookingDetails, setBookingDetails } = useRoomContext()
+    const { studentId, selectedRoom, selectedDate, selectedTimeSlot, bookedSlots, setBookedSlots, bookingDetails, setBookingDetails } = useRoomContext()
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
     const [isBooked, setIsBooked] = useState(false)
 
     useEffect(() => {
-        const checkIfBooked = bookedSlots[selectedDate]?.includes(selectedTimeSlot)
-        setIsBooked(checkIfBooked)
-
-        if(checkIfBooked) {
-            const details = bookingDetails[`${selectedDate}-${selectedTimeSlot}`] || {}
-            setName(details.name || '')  
-            setReason(details.reason || '')  
+        const fetchBookingDetails = async () => {
+            const { data, error } = await supabase
+                .from('bookings')
+                .select('name, reason, date, timeslot')
+                .eq('student_id', studentId)
+                .eq('date', selectedDate)
+                .eq('timeslot', selectedTimeSlot)
+                .single()
+    
+            if (error) {
+                console.error('Error fetching booking details:', error)
+            } else if (data) {
+                setName(data.name)
+                setReason(data.reason)
+                setIsBooked(true)
+    
+                // Update the bookedSlots in context to persist the booking state
+                setBookedSlots(prevSlots => ({
+                    ...prevSlots,
+                    [data.date]: [...(prevSlots[data.date] || []), data.timeslot],
+                }))
+            }
         }
-    }, [selectedDate, selectedTimeSlot, bookedSlots, bookingDetails])
+    
+        if (selectedDate && selectedTimeSlot) {
+            fetchBookingDetails()
+        }
+    }, [selectedDate, selectedTimeSlot, studentId, setBookedSlots])
 
-    const handleBooking = () => {
+
+    const handleBooking = async () => {
         if (name && reason) {
-            console.log('Booking Details:', { name, studentId, reason, selectedDate, selectedTimeSlot })
-            setLoading(true)
+            setLoading(true);
 
-            setBookingDetails(prevDetails => ({
-                ...prevDetails,
-                [`${selectedDate}-${selectedTimeSlot}`]: { name, reason }
-            }))
+            const { data, error } = await supabase
+                .from('bookings')
+                .insert([{
+                    student_id: studentId,
+                    name,
+                    reason,
+                    date: selectedDate,
+                    timeslot: selectedTimeSlot,
+                }]);
 
+            if (error) {
+                console.error('Error booking:', error);
+            } else {
+                setBookedSlots(prevSlots => ({
+                    ...prevSlots,
+                    [selectedDate]: [...(prevSlots[selectedDate] || []), selectedTimeSlot],
+                }));
+                setIsBooked(true);
+                navigate('/booking');
+            }
+
+            setLoading(false);
+        } else {
+            console.log('Please fill in all the fields');
+        }
+    }
+
+
+    const handleCancelBooking = async () => {
+        setLoading(true);
+
+        const { data, error } = await supabase
+            .from('bookings')
+            .delete()
+            .match({ student_id: studentId, date: selectedDate, timeslot: selectedTimeSlot });
+
+        if (error) {
+            console.error('Error canceling booking:', error);
+        } else {
             setBookedSlots(prevSlots => ({
                 ...prevSlots,
-                [selectedDate]: [...(prevSlots[selectedDate] || []), selectedTimeSlot]
-            }))
-
-            setTimeout(() => {
-                setIsBooked(true)
-                setLoading(false)
-                navigate('/booking')
-            }, 1500)
-        } else {
-            console.log('Please fill in all the fields')
+                [selectedDate]: prevSlots[selectedDate].filter(slot => slot !== selectedTimeSlot),
+            }));
+            setIsBooked(false);
+            navigate('/booking');
         }
-    }
 
-    const handleCancelBooking = () => {
-        setLoading(true)
-
-        setBookedSlots(prevSlots => ({
-            ...prevSlots,
-            [selectedDate]: prevSlots[selectedDate].filter(slot => slot !== selectedTimeSlot)
-        }))
-
-        setBookingDetails(prevDetails => {
-            const updatedDetails = { ...prevDetails }
-            delete updatedDetails[`${selectedDate}-${selectedTimeSlot}`]
-            return updatedDetails
-        })
-
-        setTimeout(() => {
-            setIsBooked(false)
-            setLoading(false)
-            navigate('/booking')
-        }, 1500)
-    }
+        setLoading(false);
+    };
 
     return (
         <View style={styles.container}>
@@ -195,5 +224,6 @@ const Detail = () => {
         </View>
     )
 }
+
 
 export default Detail
