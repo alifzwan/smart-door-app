@@ -1,10 +1,11 @@
-import React, { useContext } from 'react'
-import { StyleSheet, Text, View, Pressable, Image } from 'react-native'
+import React, { useContext, useEffect, useState } from 'react'
+import { StyleSheet, Text, View, Pressable, Image, ActivityIndicator } from 'react-native'
 import { Ionicons, FontAwesome } from '@expo/vector-icons'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useNavigate } from 'react-router-native'
 import { RoomContext } from '../../utils/RoomContext'
 import theme from '../../theme/theme'
+import { supabase } from '../../lib/supabase'
 
 
 const styles = StyleSheet.create({
@@ -62,7 +63,34 @@ const styles = StyleSheet.create({
 
 const Room = () => {
     const navigate = useNavigate()
-    const { setSelectedRoom } = useContext(RoomContext)
+    const { studentId, selectedRoom, setSelectedRoom } = useContext(RoomContext)
+    const [name, setName] = useState('')
+
+    useEffect(() => {
+      if(studentId) {
+        fetchName()
+      }
+    }, [studentId])
+
+    const fetchName = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('students')
+                .select('name')
+                .eq('student_id', studentId)
+                .single()
+            if(error) {
+                throw error
+            }
+
+            setName(data.name)
+        } catch (error) {
+            console.error('Error fetching student name:', error)
+        }
+    }
+    
+
+
 
     const handlePress = (room) => {
         setSelectedRoom(room)
@@ -74,7 +102,11 @@ const Room = () => {
             <LinearGradient colors={['#FF512F', '#DD2476']} style={styles.header}>
                 <View style={styles.userInfo}>
                     <FontAwesome name="user-circle" size={30} color="white" style={{marginRight: 5}}/>
-                    <Text style={styles.welcomeText}>Hi, Alif Zakwan</Text>
+                    {name ? (
+                        <Text style={styles.welcomeText}>Hi, {name}</Text>
+                    ) : (
+                        <ActivityIndicator size="small" color="#fff" />
+                    )}
                 </View>
                 <Text style={styles.welcomeText}>Room Access</Text>
             </LinearGradient>
