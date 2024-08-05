@@ -11,7 +11,7 @@ const app = express()
 app.use(express.json())
 app.use(cors())
 
-let roomStatus = { status: 'unknown', timestamp: null} // room status is unknown until we receive data from arduino
+let roomStatus = { status: 'locked', timestamp: null} // room status is unknown until we receive data from arduino
 
 // Establish connection with arduino
 const arduinoPort = new SerialPort({ 
