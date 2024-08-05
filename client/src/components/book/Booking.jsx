@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Pressable } from 'react-native'
+import { StyleSheet, Text, View, Pressable, ActivityIndicator } from 'react-native'
 import { useState, useEffect } from 'react'
 import { Calendar } from 'react-native-calendars'
 import theme from '../../theme/theme'
@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
         fontSize: theme.fontSize.subheading,
     },
     calendar: {
-        padding: '0 10px 10px 10px',
+        padding: '10px',
         marginBottom: 40,
         borderWidth: 1,
         borderRadius: 10,
@@ -76,6 +76,7 @@ const styles = StyleSheet.create({
 const BookingScreen = () => {
     const [selectedDate, setSelectedDate] = useState('')
     const [selectedTimeSlot, setSelectedTimeSlot] = useState(null)
+    const [loading, setLoading] = useState(true)
     const { bookedSlots, setBookedSlots, setSelectedDate: setContextDate, setSelectedTimeSlot: setContextTimeSlot } = useRoomContext()
     const navigate = useNavigate()
 
@@ -87,27 +88,34 @@ const BookingScreen = () => {
 
     useEffect(() => {
         const fetchBookedSlots = async () => {
-            const { data, error } = await supabase
+            try {
+                const { data, error } = await supabase
                 .from('bookings')
-                .select('date, timeslot')
+                .select('date, timeslot, name')
             
-            if (error) {
+                if (error) {
+                    console.error('Error fetching booked slots:', error)
+                } else {
+                    const slots = data.reduce((acc, booking) => {
+                        const date = booking.date
+                        const timeSlot = booking.timeslot
+
+                        if (!acc[date]) {
+                            acc[date] = []
+                        }
+
+                        acc[date].push(timeSlot)
+                        return acc
+                    }, {})
+
+                    setBookedSlots(slots)
+                    setLoading(false)
+                }
+            } catch (error){
                 console.error('Error fetching booked slots:', error)
-            } else {
-                const slots = data.reduce((acc, booking) => {
-                    const date = booking.date
-                    const timeSlot = booking.timeslot
-
-                    if (!acc[date]) {
-                        acc[date] = []
-                    }
-
-                    acc[date].push(timeSlot)
-                    return acc
-                }, {})
-
-                setBookedSlots(slots)
+                setLoading(false)
             }
+            
         }
 
         fetchBookedSlots()
@@ -180,22 +188,26 @@ const BookingScreen = () => {
             />
 
             <View style={styles.timeSlotContainer}>
-                {getCurrentTimeSlots().map((time, index) => {
-                    const isBooked = bookedSlots[selectedDate]?.includes(time)
-                    return (
-                        <Pressable
-                            key={index}
-                            style={[
-                                styles.timeSlotButton,
-                                selectedTimeSlot === time && { backgroundColor: 'tomato' },
-                                isBooked && { backgroundColor: selectedTimeSlot === time ? 'tomato' : 'red' },
-                            ]}
-                            onPress={() => handleTimeSlotPress(time)}
-                        >
-                            <Text style={styles.timeSlotText}>{time}</Text>
-                        </Pressable>
-                    )
-                })}
+                { loading ? (
+                    <ActivityIndicator size="large" color={theme.backgroundColor.secondary} />
+                ) : ( 
+                    getCurrentTimeSlots().map((time, index) => {
+                        const isBooked = bookedSlots[selectedDate]?.includes(time)
+                        return (
+                            <Pressable
+                                key={index}
+                                style={[
+                                    styles.timeSlotButton,
+                                    selectedTimeSlot === time && { backgroundColor: 'tomato' },
+                                    isBooked && { backgroundColor: selectedTimeSlot === time ? 'tomato' : 'red' },
+                                ]}
+                                onPress={() => handleTimeSlotPress(time)}
+                            >
+                                <Text style={styles.timeSlotText}>{time}</Text>
+                            </Pressable>
+                        )
+                    })
+                )}
             </View>
 
 
