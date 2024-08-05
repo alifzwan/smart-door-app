@@ -80,7 +80,10 @@ const styles = StyleSheet.create({
 
 const Detail = () => {
     const [name, setName] = useState('')
+    const [studentName, setStudentName] = useState('')
+    const [matricNumber, setMatricNumber] = useState('')
     const [reason, setReason] = useState('')
+    const [canCancelBooking, setCanCancelBooking] = useState(false)
     const { studentId, selectedRoom, selectedDate, selectedTimeSlot, bookedSlots, setBookedSlots, bookingDetails, setBookingDetails } = useRoomContext()
     const navigate = useNavigate()
     const [loading, setLoading] = useState(false)
@@ -88,44 +91,88 @@ const Detail = () => {
 
     useEffect(() => {
         const fetchBookingDetails = async () => {
-            const { data, error } = await supabase
-                .from('bookings')
-                .select('name, reason, date, timeslot')
-                .eq('student_id', studentId)
-                .eq('date', selectedDate)
-                .eq('timeslot', selectedTimeSlot)
-                .single()
-    
-            if (error) {
+            try {
+                const { data, error } = await supabase
+                    .from('bookings')
+                    .select('name, student_id, reason, date, timeslot')
+                    .eq('date', selectedDate)
+                    .eq('timeslot', selectedTimeSlot)
+                    .single()
+                
+                if(error) {
+                    console.error('Error fetching booking details:', error)
+                    return
+                }
+                
+                if (data) {
+                    setName(data.name)
+                    setReason(data.reason)
+                    setMatricNumber(data.student_id)
+                    setIsBooked(true)
+
+                    // Only allow canceling if the booking belongs to the current user
+                    if (data.student_id === studentId) {
+                        setCanCancelBooking(true)
+                    } else {
+                        setCanCancelBooking(false)
+                    }
+
+                    // Update the bookedSlots in context to persist the booking state
+                    setBookedSlots(prevSlots => ({
+                        ...prevSlots,
+                        [data.date]: [...(prevSlots[data.date] || []), data.timeslot],
+                    }))
+                } else {
+                    setName('');
+                    setReason('');
+                    setMatricNumber(studentId); // Use the studentId from context
+                    setIsBooked(false);
+                    setCanCancelBooking(false);
+                }
+            } catch (error) {
                 console.error('Error fetching booking details:', error)
-            } else if (data) {
-                setName(data.name)
-                setReason(data.reason)
-                setIsBooked(true)
-    
-                // Update the bookedSlots in context to persist the booking state
-                setBookedSlots(prevSlots => ({
-                    ...prevSlots,
-                    [data.date]: [...(prevSlots[data.date] || []), data.timeslot],
-                }))
             }
         }
-    
+
         if (selectedDate && selectedTimeSlot) {
             fetchBookingDetails()
+        }
+        if(studentId) {
+            fetchName()
         }
     }, [selectedDate, selectedTimeSlot, studentId, setBookedSlots])
 
 
+    const fetchName = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('students')
+                .select('name')
+                .eq('student_id', studentId)
+                .single()
+
+            if(error){
+                throw error
+            }
+            setStudentName(data.name)
+
+        } catch (error) {
+            console.error('Error fetching student name:', error)
+        }
+    }
+
+
+
+
     const handleBooking = async () => {
-        if (name && reason) {
+        if (reason) {
             setLoading(true);
 
             const { data, error } = await supabase
                 .from('bookings')
                 .insert([{
                     student_id: studentId,
-                    name,
+                    name: studentName,
                     reason,
                     date: selectedDate,
                     timeslot: selectedTimeSlot,
@@ -176,17 +223,15 @@ const Detail = () => {
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Name</Text>
                 <TextInput
-                    value={name}
-                    onChangeText={setName}
-                    style={[styles.input, isBooked && styles.disabledInput]}
-                    placeholder="Enter your name"
+                    value={name || studentName}
+                    style={[styles.input, styles.disabledInput]}
                     editable={!isBooked} // Disable the input when already booked
                 />
             </View>
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Matric Number</Text>
                 <TextInput
-                    value={studentId}
+                    value={matricNumber || studentId}
                     style={[styles.inputMatric, styles.disabledInput]}
                     editable={false} // Make this field non-editable
                 />
@@ -212,13 +257,15 @@ const Detail = () => {
                         )}
                     </Pressable>
                 ) : (
-                    <Pressable style={styles.cancelButton} onPress={handleCancelBooking} disabled={loading}>
-                        {loading ? (
-                            <ActivityIndicator size="small" color="#fff" />
-                        ) : (
-                            <Text style={styles.cancelButtonText}>Cancel Booking</Text>
-                        )}
-                    </Pressable>
+                    canCancelBooking && (
+                        <Pressable style={styles.cancelButton} onPress={handleCancelBooking} disabled={loading}>
+                            {loading ? (
+                                <ActivityIndicator size="small" color="#fff" />
+                            ) : (
+                                <Text style={styles.cancelButtonText}>Cancel Booking</Text>
+                            )}
+                        </Pressable>
+                    )
                 )}
             </View>
         </View>
