@@ -91,7 +91,7 @@ const Homepage = () => {
     if(studentId) {
       fetchName()
     }
-    
+
   }, [studentId])
 
   const fetchName = async () => {
@@ -125,7 +125,7 @@ const Homepage = () => {
         <View style={styles.userInfo}>
             <FontAwesome name="user-circle" size={30} color="white" style={{marginRight: 5}}/>
             {name ? (
-              <Text style={styles.welcomeText}>{name}</Text>
+              <Text style={styles.welcomeText}> Welcome {name}!</Text>
             ) : (
               <ActivityIndicator size="small" color="#fff" />
             )}
