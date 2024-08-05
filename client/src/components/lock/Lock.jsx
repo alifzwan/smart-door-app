@@ -5,12 +5,10 @@ import { lockRoom, unlockRoom, getStatus } from '../../services/arduino'
 import theme from '../../theme/theme'
 import AppBar from '../bar/AppBar'
 import Room from '../room/Room'
-import { RoomContext, useRoomContext } from '../../utils/RoomContext';
+import { RoomContext, useRoomContext } from '../../utils/RoomContext'
 import { supabase } from '../../lib/supabase'
-import moment from 'moment-timezone';
+import moment from 'moment-timezone'
 import { LinearGradient } from 'expo-linear-gradient'
-
-
 
 
 const styles = StyleSheet.create({
@@ -83,15 +81,40 @@ const styles = StyleSheet.create({
 
 const Lock = () => {
     
-    const [status, setStatus] = useState({ status: '', timestamp: ''});
+    const [status, setStatus] = useState({ status: '', timestamp: ''})
+    const [name, setName] = useState('')
     const { selectedRoom } = useContext(RoomContext)
     const { studentId } = useRoomContext() // Get the student ID from the context
 
     useEffect(() => {
-        updateStatus();
+        fetchName()
+        updateStatus()
     }, []);
 
+    const fetchName = async () => {
+        try {
+            const { data, error } = await supabase
+                .from('students')   
+                .select('name')
+                .eq('student_id', studentId)
+                .single()
+            
+            if(error){
+                throw error
+            }
+
+            setName(data.name)
+        } catch (error){
+            console.error('Error fetching name:', error)
+        }
+    }
+
     const handleLock = async () => {
+        if(status.status === 'locked'){
+            console.error('Error', 'Room is already locked')
+            return 
+        }
+
         try {
             const response = await lockRoom()
             setStatus(response)
@@ -103,6 +126,10 @@ const Lock = () => {
     }
 
     const handleUnlock = async () => {
+        if(status.status === 'unlocked'){
+            console.error('Error', 'Room is already unlocked')
+            return
+        }
         try {
             const response = await unlockRoom()
             setStatus(response)
@@ -115,8 +142,8 @@ const Lock = () => {
 
     const updateStatus = async () => {
         try {
-            const currentStatus = await getStatus();
-            setStatus(currentStatus);
+            const currentStatus = await getStatus()
+            setStatus(currentStatus)
         } catch (error) {
             Alert.alert('Error', 'Failed to fetch status');
         }
@@ -127,7 +154,12 @@ const Lock = () => {
             const timestamp = moment().tz('Asia/Kuala_Lumpur').format('YYYY-MM-DD HH:mm') // Get the current timestamp in Kuala Lumpur timezone
             const { error } = await supabase
                 .from('student_actions')
-                .insert([{ student_id: studentId, action, timestamp: timestamp }])
+                .insert([{ 
+                    student_id: studentId, 
+                    name: name, 
+                    action, 
+                    timestamp: timestamp 
+                }])
 
             if(error){
                 throw error
@@ -144,7 +176,7 @@ const Lock = () => {
         <View style={styles.container}>
            <LinearGradient colors={['#FF512F', '#DD2476']} style={styles.linearGradient}>
                 <Text style={styles.statusText}>
-                    <FontAwesome name="user-circle" size={30} color="#fff" /> Hi Alif Zakwan!
+                    <FontAwesome name="user-circle" size={30} color="#fff" /> Hi {name}!
                 </Text>
                 <Text style={styles.statusText}>
                     Room {selectedRoom} is {status.status}
