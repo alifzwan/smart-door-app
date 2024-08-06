@@ -120,7 +120,7 @@ const Book = () => {
             </LinearGradient>
             
             <View style={styles.buttonContainer}>
-                {[1, 2, 3, 4, 5, 6].map((room, index) => (
+                {[1, 2, 3, 4, 5].map((room, index) => (
                     <Pressable key={index} style={styles.button} onPress={() => handlePress(room)}>
                         <Text style={styles.buttonText}>Room {room}</Text>
                         <Ionicons name="arrow-forward" size={24} color="#fff" />
