@@ -79,8 +79,8 @@ const styles = StyleSheet.create({
 })
 
 const Detail = () => {
-    const [name, setName] = useState('')
-    const [studentName, setStudentName] = useState('')
+    const [name, setName] = useState('') //from bookings
+    const [studentName, setStudentName] = useState('') // from students
     const [matricNumber, setMatricNumber] = useState('')
     const [reason, setReason] = useState('')
     const [canCancelBooking, setCanCancelBooking] = useState(false)
@@ -89,77 +89,80 @@ const Detail = () => {
     const [loading, setLoading] = useState(false)
     const [isBooked, setIsBooked] = useState(false)
 
+    // Fetch booking details when the selected date or time slot changes
     useEffect(() => {
         const fetchBookingDetails = async () => {
-            try {
-                const { data, error } = await supabase
-                    .from('bookings')
-                    .select('name, student_id, reason, date, timeslot')
-                    .eq('date', selectedDate)
-                    .eq('timeslot', selectedTimeSlot)
-                    .single()
-                
-                if(error) {
-                    console.error('Error fetching booking details:', error)
-                    return
-                }
-                
-                if (data) {
-                    setName(data.name)
-                    setReason(data.reason)
-                    setMatricNumber(data.student_id)
-                    setIsBooked(true)
-
-                    // Only allow canceling if the booking belongs to the current user
-                    if (data.student_id === studentId) {
-                        setCanCancelBooking(true)
-                    } else {
-                        setCanCancelBooking(false)
+            if(selectedDate && selectedTimeSlot) {
+                try {
+                    const { data, error } = await supabase
+                        .from('bookings')
+                        .select('name, student_id, reason, date, timeslot')
+                        .eq('date', selectedDate)
+                        .eq('timeslot', selectedTimeSlot)
+                        .single()
+                    
+                    if(error) {
+                        console.error('Error fetching booking details:', error)
+                        return
                     }
-
-                    // Update the bookedSlots in context to persist the booking state
-                    setBookedSlots(prevSlots => ({
-                        ...prevSlots,
-                        [data.date]: [...(prevSlots[data.date] || []), data.timeslot],
-                    }))
-                } else {
-                    setName('');
-                    setReason('');
-                    setMatricNumber(studentId); // Use the studentId from context
-                    setIsBooked(false);
-                    setCanCancelBooking(false);
+                    
+                    if (data) {
+                        setName(data.name)
+                        setReason(data.reason)
+                        setMatricNumber(data.student_id)
+                        setIsBooked(true)
+    
+                        // Only allow canceling if the booking belongs to the current user
+                        if (data.student_id === studentId) {
+                            setCanCancelBooking(true)
+                        } else {
+                            setCanCancelBooking(false)
+                        }
+    
+                        // Update the bookedSlots in context to persist the booking state
+                        setBookedSlots(prevSlots => ({
+                            ...prevSlots,
+                            [data.date]: [...(prevSlots[data.date] || []), data.timeslot],
+                        }))
+                    } else {
+                        // If no booking exists, clear fields and fetch student name
+                        setName('');
+                        setReason('');
+                        setMatricNumber(studentId); // Use the studentId from context
+                        setIsBooked(false);
+                        setCanCancelBooking(false);
+                    }
+                } catch (error) {
+                    console.error('Error fetching booking details:', error)
                 }
-            } catch (error) {
-                console.error('Error fetching booking details:', error)
+                
             }
         }
-
-        if (selectedDate && selectedTimeSlot) {
-            fetchBookingDetails()
-        }
-        if(studentId) {
-            fetchName()
-        }
+        fetchBookingDetails()
     }, [selectedDate, selectedTimeSlot, studentId, setBookedSlots])
 
-
-    const fetchName = async () => {
-        try {
-            const { data, error } = await supabase
-                .from('students')
-                .select('name')
-                .eq('student_id', studentId)
-                .single()
-
-            if(error){
-                throw error
+    useEffect(() => {
+        const fetchName = async () => {
+            if(studentId) {
+                try {
+                    const { data, error } = await supabase
+                        .from('students')
+                        .select('name')
+                        .eq('student_id', studentId)
+                        .single()
+                    
+                    if(error) {
+                        console.error('Error fetching student name:', error)
+                        return
+                    }
+                    setStudentName(data.name)
+                } catch (error){
+                    console.error('Error fetching student name:', error)
+                }
             }
-            setStudentName(data.name)
-
-        } catch (error) {
-            console.error('Error fetching student name:', error)
         }
-    }
+        fetchName()
+    }, [studentId])
 
 
 
